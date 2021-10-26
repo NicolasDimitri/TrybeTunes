@@ -18,9 +18,8 @@ export default class Login extends Component {
   }
 
   handleChange({ target: { value } }) {
-    const MAX_LENGTH = 2;
-    const { login } = this.state;
-    const loginMinLength = login.length >= MAX_LENGTH;
+    const MAX_LENGTH = 3;
+    const loginMinLength = value.length >= MAX_LENGTH;
     this.setState({
       login: value,
       isDesactiveButton: !loginMinLength,
