@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { addSong } from '../services/favoriteSongsAPI';
+import { addSong, getFavoriteSongs } from '../services/favoriteSongsAPI';
 import Loading from '../pages/Loading';
 
 export default class MusicCard extends Component {
@@ -8,16 +8,45 @@ export default class MusicCard extends Component {
     super();
     this.state = {
       loading: false,
+      isFavorite: false,
     };
     this.handleButton = this.handleButton.bind(this);
   }
 
+  componentDidMount() {
+    this.favoritesFunc();
+  }
+
   handleButton(song) {
+    const { isFavorite } = this.state;
+    if (!isFavorite) {
+      this.setState({
+        loading: true,
+        isFavorite: true,
+      }, async () => {
+        await addSong(song);
+        this.setState({
+          loading: false,
+        });
+      });
+    } else {
+      this.setState({
+        isFavorite: false,
+      });
+    }
+  }
+
+  favoritesFunc() {
+    const {
+      idFav,
+    } = this.props;
     this.setState({
       loading: true,
     }, async () => {
-      await addSong(song);
+      const favorites = await getFavoriteSongs();
+      const isFavorite = favorites.some((music) => music.trackId === idFav);
       this.setState({
+        isFavorite,
         loading: false,
       });
     });
@@ -26,37 +55,34 @@ export default class MusicCard extends Component {
   render() {
     const {
       musicList,
+      music,
     } = this.props;
     const {
       loading,
+      isFavorite,
     } = this.state;
     return (
-      <div data-testid="page-album">
-        {loading && <Loading />}
+      <div>
         {musicList.length > 0
     && (
-      <>
-        <h1 data-testid="artist-name">{musicList[0].artistName}</h1>
-        <h3 data-testid="album-name">{musicList[0].collectionName}</h3>
-        {musicList.slice(1).map((album) => (
-          <div key={ album.artistId }>
-            <p>{album.trackName}</p>
-            <audio data-testid="audio-component" src={ album.previewUrl } controls>
-              <track kind="captions" />
-              <code>audio</code>
-            </audio>
-            <label htmlFor={ album.amgArtistId }>
-              Favorita
-              <input
-                data-testid={ `checkbox-music-${album.trackId}` }
-                id={ album.amgArtistId }
-                type="checkbox"
-                onChange={ () => this.handleButton(album) }
-              />
-            </label>
-          </div>
-        ))}
-      </>)}
+      <div>
+        {loading && <Loading />}
+        <p>{music.trackName}</p>
+        <audio data-testid="audio-component" src={ music.previewUrl } controls>
+          <track kind="captions" />
+          <code>audio</code>
+        </audio>
+        <label htmlFor={ music.amgArtistId }>
+          Favorita
+          <input
+            data-testid={ `checkbox-music-${music.trackId}` }
+            id={ music.amgArtistId }
+            type="checkbox"
+            checked={ isFavorite }
+            onChange={ () => this.handleButton(music) }
+          />
+        </label>
+      </div>)}
       </div>
     );
   }
@@ -64,4 +90,6 @@ export default class MusicCard extends Component {
 
 MusicCard.propTypes = {
   musicList: PropTypes.arrayOf(PropTypes.object).isRequired,
+  music: PropTypes.objectOf(PropTypes.string).isRequired,
+  idFav: PropTypes.string.isRequired,
 };

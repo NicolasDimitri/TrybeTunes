@@ -25,7 +25,6 @@ export default class Album extends Component {
       },
     } = this.props;
     const musicList = await getMusics(id);
-    console.log(musicList);
     this.setState({
       musicList,
     });
@@ -36,9 +35,21 @@ export default class Album extends Component {
       musicList,
     } = this.state;
     return (
-      <div>
+      <div data-testid="page-album">
         <Header />
-        <MusicCard musicList={ musicList } />
+        {musicList[1]
+        && (
+          <div>
+            <h1 data-testid="artist-name">{musicList[0].artistName}</h1>
+            <h3 data-testid="album-name">{musicList[0].collectionName}</h3>
+          </div>
+        )}
+        {musicList[1] && musicList.slice(1).map((album) => (<MusicCard
+          key={ album.trackId }
+          music={ album }
+          musicList={ musicList }
+          idFav={ album.trackId }
+        />))}
       </div>
     );
   }
