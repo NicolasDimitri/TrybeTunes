@@ -72,11 +72,11 @@ export default class MusicCard extends Component {
           <track kind="captions" />
           <code>audio</code>
         </audio>
-        <label htmlFor={ music.amgArtistId }>
+        <label htmlFor={ music.trackId }>
           Favorita
           <input
             data-testid={ `checkbox-music-${music.trackId}` }
-            id={ music.amgArtistId }
+            id={ music.trackId }
             type="checkbox"
             checked={ isFavorite }
             onChange={ () => this.handleButton(music) }
@@ -89,7 +89,11 @@ export default class MusicCard extends Component {
 }
 
 MusicCard.propTypes = {
+  idFav: PropTypes.number.isRequired,
+  music: PropTypes.shape({
+    previewUrl: PropTypes.string,
+    trackId: PropTypes.number,
+    trackName: PropTypes.string,
+  }).isRequired,
   musicList: PropTypes.arrayOf(PropTypes.object).isRequired,
-  music: PropTypes.objectOf(PropTypes.string).isRequired,
-  idFav: PropTypes.string.isRequired,
 };
